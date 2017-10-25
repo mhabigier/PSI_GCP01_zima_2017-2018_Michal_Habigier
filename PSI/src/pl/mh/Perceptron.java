@@ -1,6 +1,7 @@
 package pl.mh;
 
 import java.io.*;
+import java.util.Random;
 import java.util.Scanner;
 
 
@@ -10,13 +11,42 @@ public class Perceptron {
     private double[] synapses;
     private int[] data;
     private String[] parts;
-    private File dataFile = new File("data.txt");
-    private int lines=linesCounter(dataFile);
+    private File dataFileReader= new File("data.txt");
+    private int dataCount;
+    private double rate;
+
+    public File getDataFileReader() {
+        return dataFileReader;
+    }
+
+    public void setDataFileReader(File dataFileReader) {
+        this.dataFileReader = dataFileReader;
+    }
+
+    public int getLines() throws IOException {
+        return linesCounter(dataFileReader);
+    }
+
+    public int getDataCount() {
+        return dataCount;
+    }
+
+    public double getRate() {
+        return rate;
+    }
+
+    public void setRate(double rate) {
+        this.rate = rate;
+    }
+
+    public void setDataCount(int dataCount) {
+        this.dataCount = dataCount;
+    }
 
     public Perceptron() throws IOException {
-        this.dendrites =new double[lines][2];
+        this.dendrites =new double[getLines()][2];
         this.synapses =new double[2];
-        this.data =new int[lines];
+        this.data =new int[getLines()];
     }
 
     public int linesCounter(File inputFile)throws IOException{
@@ -37,10 +67,9 @@ public class Perceptron {
 
     public void readFromFile()throws IOException{
         try {
-            lines = linesCounter(dataFile);
-            Scanner read = new Scanner(dataFile);
+            Scanner read = new Scanner(dataFileReader);
             String text=read.nextLine();
-            for(int i=0;i<lines;++i){
+            for(int i=0;i<getLines();++i){
                 parts = text.split(";");
                 dendrites[i][0]=(Double.parseDouble(parts[0]));
                 dendrites[i][1]=(Double.parseDouble(parts[1]));
@@ -51,6 +80,7 @@ public class Perceptron {
             e.printStackTrace();
         }
     }
+
 
     public void setSynapses(){
         for(int i=0;i<2;++i){
@@ -78,19 +108,19 @@ public class Perceptron {
         readFromFile();
         setSynapses();
 
-        double tempErr=0;
+        double tempErr;
         int error;
         int testLimit=0;
 
         do {
             error=0;
             testLimit++;
-            for (int i = 0; i < lines; ++i) {
+            for (int i = 0; i < getLines(); ++i) {
                 tempErr = data[i] - getOutput(i);
 
                 for(int j=0;j<2;++j)
                 {
-                    synapses[j]+=0.0000001* dendrites[i][j]*(data[i]-getOutput(i));
+                    synapses[j]+= rate * dendrites[i][j]*(data[i]-getOutput(i));
                 }
 
                 error+=tempErr;
@@ -108,7 +138,7 @@ public class Perceptron {
 
         error = 0;
 
-        for(int i=0;i<lines;++i){
+        for(int i=0;i<getLines();++i){
             System.out.println("Liczba "+ dendrites[i][0]+" < "+ dendrites[i][1]+" poprawna odpowiedz: "+ data[i]+" odpowiedz: "+getOutput(i));
             if(data[i]!=getOutput(i))error++;
         }
